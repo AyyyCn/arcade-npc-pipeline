@@ -1,0 +1,339 @@
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .pipeline {
+    --ink: #1d2e26;
+    --green: #294e3e;
+    --rule: #b1b8aa;
+    min-height: 100svh;
+    max-width: 2200px;
+    margin: auto;
+    padding: 2.8vh 4.35vw 2vh;
+    color: var(--ink);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  .pipeline a {
+    color: inherit;
+    text-underline-offset: 4px;
+  }
+  .pipeline header {
+    height: 6.1vh;
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+    gap: 1.2vw;
+    border-bottom: 1px solid var(--rule);
+  }
+  .pipe-brand {
+    font-weight: 720;
+    font-size: clamp(24px, 2.03vw, 46px);
+    letter-spacing: -0.065em;
+  }
+  .pipe-product,
+  .pipe-headlinks {
+    font-size: clamp(13px, 1.05vw, 24px);
+  }
+  .pipe-product {
+    padding-left: 1.25vw;
+    border-left: 1px solid var(--rule);
+  }
+  .pipe-headlinks {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1.7vw;
+    color: #4c6051;
+  }
+  .pipeline h1 {
+    font-size: clamp(45px, 4.5vw, 95px);
+    font-weight: 590;
+    line-height: 1.02;
+    letter-spacing: -0.064em;
+    margin: 3.5vh 0 2.7vh;
+  }
+  .pipe-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    gap: 2.05vw;
+  }
+  .pipe-input {
+    border-top: 2px solid var(--ink);
+    padding-top: 1.8vh;
+  }
+  .pipe-fieldhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.2vh;
+    gap: 7px;
+  }
+  .pipe-kicker,
+  .pipe-fieldhead label {
+    color: #405a49;
+    font-size: clamp(14px, 1.1vw, 23px);
+    font-weight: 650;
+  }
+  .pipe-fieldhead select {
+    max-width: 52%;
+    font: inherit;
+    font-size: clamp(12px, 0.93vw, 19px);
+    border: 0;
+    background: transparent;
+    color: #475a4b;
+  }
+  .pipeline textarea {
+    display: block;
+    background: #faf9f4;
+    color: var(--ink);
+    border: 1px solid #9ea99b;
+    border-radius: 3px;
+    width: 100%;
+    height: 16.5vh;
+    min-height: 112px;
+    padding: 0.7vw 1.05vw;
+    font:
+      500 clamp(20px, 1.84vw, 42px)/1.14 "Helvetica Neue",
+      Arial,
+      sans-serif;
+    letter-spacing: -0.035em;
+    resize: none;
+  }
+  .pipeline textarea:focus-visible {
+    outline: 2px solid #64806e;
+    outline-offset: 2px;
+  }
+  .pipeline button {
+    font:
+      620 clamp(13px, 1.03vw, 21px)/1.18 "Helvetica Neue",
+      Arial,
+      sans-serif;
+    padding: 0.56em 0.9em;
+    border: 1px solid #789080;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--green);
+    cursor: pointer;
+  }
+  .pipeline #run-brief {
+    background: var(--green);
+    color: #f8f8ef;
+    border-color: var(--green);
+    margin-top: 1.3vh;
+  }
+  .pipeline button:disabled {
+    opacity: 0.52;
+    cursor: default;
+  }
+  .pipe-detail {
+    margin-top: 3.1vh;
+  }
+  .pipe-detail h2 {
+    font-size: clamp(14px, 1.1vw, 23px);
+    color: #405a49;
+    margin: 0 0 1.05vh;
+  }
+  .pipe-detail p {
+    font-size: clamp(16px, 1.47vw, 29px);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    max-width: 29em;
+    margin: 0.8vh 0;
+    color: #415447;
+  }
+  .pipe-rows {
+    margin: 0;
+  }
+  .pipe-rows div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.65vw;
+    padding: 1.15vh 0;
+    border-top: 1px solid var(--rule);
+  }
+  .pipe-rows dt,
+  .pipe-rows dd {
+    font-size: clamp(15px, 1.24vw, 28px);
+    letter-spacing: -0.018em;
+    margin: 0;
+  }
+  .pipe-rows dt a {
+    text-decoration-thickness: 1px;
+  }
+  .pipe-rows dd {
+    font-weight: 600;
+  }
+  .pipe-figure {
+    height: 59vh;
+    min-height: 310px;
+    position: relative;
+    overflow: hidden;
+    background: #302e29;
+    margin: 0;
+  }
+  .pipe-figure canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .pipe-figure::after {
+    content: "";
+    position: absolute;
+    inset: 58% 0 0;
+    background: linear-gradient(transparent, #121811c4);
+    pointer-events: none;
+  }
+  .pipe-figure figcaption {
+    position: absolute;
+    z-index: 1;
+    bottom: 2.5vh;
+    left: 1.35vw;
+    right: 1.35vw;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    color: #faf9ef;
+    text-shadow: 0 1px 5px #0008;
+  }
+  .pipe-figure strong {
+    font-size: clamp(16px, 1.44vw, 30px);
+    letter-spacing: -0.04em;
+  }
+  .pipe-figure figcaption span {
+    font-size: clamp(14px, 1.15vw, 25px);
+    font-variant-numeric: tabular-nums;
+  }
+  .pipe-foot {
+    min-height: 8.5vh;
+    display: flex;
+    gap: 1.5vw;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pipe-foot p {
+    margin: 0;
+    font-size: clamp(17px, 1.48vw, 31px);
+    letter-spacing: -0.033em;
+    line-height: 1.2;
+  }
+  .pipe-actions {
+    display: flex;
+    gap: 0.6vw;
+    flex-shrink: 0;
+  }
+  .pipe-actions button[aria-pressed="true"] {
+    background: #dce6db;
+    border-color: #58725e;
+  }
+  @media (max-width: 780px) {
+    .pipeline {
+      padding: 14px 18px 26px;
+    }
+    .pipeline header {
+      gap: 10px;
+    }
+    .pipe-headlinks {
+      gap: 10px;
+    }
+    .pipe-product {
+      padding-left: 10px;
+    }
+    .pipeline h1 {
+      margin: 23px 0 19px;
+    }
+    .pipe-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 17px;
+    }
+    .pipe-figure {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1.55;
+    }
+    .pipeline textarea {
+      height: 115px;
+      padding: 10px;
+    }
+    .pipe-detail {
+      margin-top: 16px;
+    }
+    .pipe-foot {
+      align-items: flex-start;
+      flex-direction: column;
+      margin-top: 16px;
+      gap: 14px;
+    }
+    .pipe-actions {
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pipe-figure figcaption {
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+    }
+  }
+</style>
+<main class="pipeline">
+  <header>
+    <span class="pipe-brand">Arcade</span
+    ><span class="pipe-product">NPC Pipeline</span>
+    <div class="pipe-headlinks">
+      <span id="pipe-source"></span><a href="?home">All scenes</a>
+    </div>
+  </header>
+  <h1 id="pipe-title">From a game brief to play</h1>
+  <div class="pipe-grid">
+    <section class="pipe-input" aria-label="Game authoring">
+      <form id="pipe-form">
+        <div class="pipe-fieldhead">
+          <label for="game-brief">Game brief</label
+          ><select aria-label="Example game briefs" id="pipe-examples"></select>
+        </div>
+        <textarea
+          id="game-brief"
+          maxlength="280"
+          placeholder="Describe a game you want to play…"
+        ></textarea>
+        <button id="run-brief">Run game brief</button>
+      </form>
+      <div id="pipe-venue" class="pipe-detail">
+        <h2>The Side B venue</h2>
+        <p>
+          Two halls share a stage crew. The record shop’s archive supplies the
+          reference record for soundcheck.
+        </p>
+      </div>
+      <div id="pipe-inferred" class="pipe-detail" hidden>
+        <h2>Behaviors in play</h2>
+        <dl id="pipe-rows" class="pipe-rows"></dl>
+      </div>
+    </section>
+    <figure class="pipe-figure">
+      <canvas id="pipe-stage" aria-label="Live stage simulation"></canvas
+      ><canvas
+        id="pipe-archive"
+        aria-label="Live archive simulation"
+        hidden
+      ></canvas>
+      <figcaption>
+        <strong id="pipe-caption">Side B stage</strong
+        ><span id="pipe-clock">Venue preview</span>
+      </figcaption>
+    </figure>
+  </div>
+  <footer class="pipe-foot">
+    <p id="pipe-status" role="status"></p>
+    <div class="pipe-actions">
+      <button id="pipe-delay" hidden>Delay the messenger</button
+      ><button id="pipe-block" hidden>Block Ida’s view</button>
+    </div>
+  </footer>
+</main>

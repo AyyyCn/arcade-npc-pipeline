@@ -1,0 +1,45 @@
+{
+  "opening": {
+    "title": "NPC Pipeline",
+    "prompt": "Make a game about saving a sold-out record shop gig when the venue changes at the last minute."
+  },
+  "scenes": [
+    {
+      "key": "social",
+      "route": "?crowd&film",
+      "title": "Social memory",
+      "caption": "Guests pass on the new address. When a conversation is missed, the news takes a different path.",
+      "labels": [
+        "The message gets through",
+        "The messenger is delayed"
+      ],
+      "frames": 158,
+      "first": 62,
+      "last": 132
+    },
+    {
+      "key": "crew",
+      "route": "?crew&film",
+      "title": "Crew coordination",
+      "caption": "A stagehand gets called away mid-job. A coworker takes over the rack so the crew can keep working.",
+      "labels": [
+        "The crew responds to the radio call"
+      ],
+      "frames": 168,
+      "first": 61,
+      "last": 231
+    },
+    {
+      "key": "perception",
+      "route": "?perception&film&screen=closed&bin=dispatch",
+      "title": "Perception & search",
+      "caption": "Ida misses the filing behind a screen. She checks the likely bins and changes course when one is empty.",
+      "labels": [
+        "Following the evidence in the archive"
+      ],
+      "frames": 172,
+      "first": 9,
+      "last": 123
+    }
+  ]
+}

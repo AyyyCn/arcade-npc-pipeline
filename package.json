@@ -1,0 +1,25 @@
+{
+  "name": "arcade-npc-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A game-brief prototype for connected NPC behavior at a record shop venue.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node serve.mjs",
+    "test": "node --test comparison/simulation.test.js crew/planner.test.js perception/search.test.js npc/motion.test.js pipeline/scenario.test.js && node smoke.cjs && node pipeline/smoke.cjs",
+    "build:site": "node build.mjs --site",
+    "pitch:film": "node pitch/film.mjs",
+    "pitch:png": "node pitch/slide.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.58.2"
+  }
+}

@@ -1,0 +1,263 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "background": "#F1F0E8",
+  "font": "Helvetica Neue",
+  "speakerNotes": "Start with the game idea. The player wants to save a sold-out gig after a venue change. The local model interprets the premise against this record shop’s supported situations. The venue supplies guests, a stage crew and an archive. Word of mouth changes who arrives. The crew adapts its setup and waits for the archivist to find the soundcheck record. The original scenes let the audience explore each behavior independently. The hosted build offers saved interpretations and the local server accepts new wording.",
+  "elements": [
+    {
+      "kind": "textbox",
+      "name": "Brand",
+      "bounds": [
+        81,
+        43.5,
+        270,
+        45
+      ],
+      "text": "Arcade",
+      "fontSize": 36,
+      "bold": true,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "textbox",
+      "name": "Slide title",
+      "bounds": [
+        76.5,
+        100.5,
+        910.5,
+        132
+      ],
+      "text": "NPC Pipeline",
+      "fontSize": 114,
+      "bold": true,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "textbox",
+      "name": "Capabilities",
+      "bounds": [
+        975,
+        103.5,
+        870,
+        132
+      ],
+      "text": "Arcade NPCs can follow routines, move, use objects\nand speak. The game brief connects those abilities\naround a player’s goal.",
+      "fontSize": 33,
+      "bold": false,
+      "color": "#354A3F"
+    },
+    {
+      "kind": "shape",
+      "name": "Rule below headline",
+      "bounds": [
+        81,
+        246,
+        1758,
+        1.5
+      ],
+      "color": "#B3BAB0"
+    },
+    {
+      "kind": "textbox",
+      "name": "Game prompt label",
+      "bounds": [
+        81,
+        271.5,
+        750,
+        34.5
+      ],
+      "text": "Game prompt",
+      "fontSize": 24,
+      "bold": true,
+      "color": "#50675A"
+    },
+    {
+      "kind": "textbox",
+      "name": "Game prompt",
+      "bounds": [
+        79.5,
+        310.5,
+        1140,
+        112.5
+      ],
+      "text": "“Make a game about saving a sold-out record shop gig\nwhen the venue changes at the last minute.”",
+      "fontSize": 42,
+      "bold": false,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "shape",
+      "name": "Division above examples",
+      "bounds": [
+        81,
+        441,
+        1758,
+        1.5
+      ],
+      "color": "#B3BAB0"
+    },
+    {
+      "kind": "textbox",
+      "name": "Examples heading",
+      "bounds": [
+        81,
+        463.5,
+        1050,
+        36
+      ],
+      "text": "NPC behaviors the game needs",
+      "fontSize": 25.51,
+      "bold": true,
+      "color": "#50675A"
+    },
+    {
+      "kind": "image",
+      "name": "social in-game capture",
+      "bounds": [
+        81,
+        517.5,
+        567,
+        288
+      ],
+      "file": "images/social.jpg",
+      "alt": "Guests exchange news at the record shop counter."
+    },
+    {
+      "kind": "textbox",
+      "name": "social title",
+      "bounds": [
+        79.5,
+        829.5,
+        579,
+        73.5
+      ],
+      "text": "Social memory",
+      "fontSize": 48,
+      "bold": true,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "textbox",
+      "name": "social evidence",
+      "bounds": [
+        81,
+        904.5,
+        580.5,
+        124.5
+      ],
+      "text": "Guests pass on what they know and\nremember who told them about the\nnew venue.",
+      "fontSize": 30,
+      "bold": false,
+      "color": "#354A3F"
+    },
+    {
+      "kind": "image",
+      "name": "crew in-game capture",
+      "bounds": [
+        676.5,
+        517.5,
+        567,
+        288
+      ],
+      "file": "images/crew.jpg",
+      "alt": "Stagehands move a PA rack across the stage."
+    },
+    {
+      "kind": "textbox",
+      "name": "crew title",
+      "bounds": [
+        675,
+        829.5,
+        579,
+        73.5
+      ],
+      "text": "Crew coordination",
+      "fontSize": 48,
+      "bold": true,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "textbox",
+      "name": "crew evidence",
+      "bounds": [
+        676.5,
+        904.5,
+        580.5,
+        124.5
+      ],
+      "text": "When a stagehand gets called away,\na coworker takes over the unfinished\njob.",
+      "fontSize": 30,
+      "bold": false,
+      "color": "#354A3F"
+    },
+    {
+      "kind": "image",
+      "name": "perception in-game capture",
+      "bounds": [
+        1272,
+        517.5,
+        567,
+        288
+      ],
+      "file": "images/perception.jpg",
+      "alt": "The archive divider obstructs Ida’s view of the record bins."
+    },
+    {
+      "kind": "textbox",
+      "name": "perception title",
+      "bounds": [
+        1270.5,
+        829.5,
+        579,
+        73.5
+      ],
+      "text": "Perception & search",
+      "fontSize": 48,
+      "bold": true,
+      "color": "#1D2C26"
+    },
+    {
+      "kind": "textbox",
+      "name": "perception evidence",
+      "bounds": [
+        1272,
+        904.5,
+        580.5,
+        124.5
+      ],
+      "text": "Ida goes straight to a record she saw\nfiled. When the filing is out of sight, she\nsearches the likely bins.",
+      "fontSize": 30,
+      "bold": false,
+      "color": "#354A3F"
+    },
+    {
+      "kind": "textbox",
+      "name": "Connection label",
+      "bounds": [
+        1278,
+        271.5,
+        562.5,
+        34.5
+      ],
+      "text": "How the behaviors connect",
+      "fontSize": 24,
+      "bold": true,
+      "color": "#50675A"
+    },
+    {
+      "kind": "textbox",
+      "name": "Connection",
+      "bounds": [
+        1275,
+        310.5,
+        568.5,
+        115.5
+      ],
+      "text": "Who hears the news changes\nwhat the crew sets up.",
+      "fontSize": 40.51,
+      "bold": true,
+      "color": "#1D2C26"
+    }
+  ]
+}
