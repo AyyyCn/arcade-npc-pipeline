@@ -7,6 +7,7 @@
 | A stagehand is called away | The crew plans work under skill, travel and dependency constraints. It resumes from the physical state of the unfinished task. | [Planner](../crew/planner.js) and [execution](../crew/execution.js) |
 | A record is filed out of sight | The archivist chooses a search order using available observations, the geometry and earlier bin visits. | [Search](../perception/search.js) |
 | Opening night depends on all of them | Attendance sets the speaker layout. Finding the reference record releases the audio task. | [Game-brief scenario](../pipeline/scenario.js) and [stage work orders](../crew/scenario.js) |
+| One night with all of them | Beliefs from the foyer decide which staff arrive late. The planner works around late arrivals, a game master searches for fixable trouble and anyone can be questioned. | [The night](../night/world.js), [knowledge and answers](../night/mind.js) and [the game master](../night/director.js) |
 
 ## What the model does
 

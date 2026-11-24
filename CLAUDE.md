@@ -1,6 +1,18 @@
 # Working on this repo
 
-This is a standalone record shop simulation. The browser demos and pitch build run from this checkout. Start by reading [the project overview](README.md) and [the experiment map](docs/SIMULATIONS.md).
+This is a standalone record shop simulation. The playable night, the browser demos and the pitch build run from this checkout. Start by reading [the project overview](README.md) and [the experiment map](docs/SIMULATIONS.md).
+
+## Change the night
+
+The landing page is one playable night that runs the crowd, the crew and the archive on a single clock. Read [how the night works](docs/NIGHT.md) first.
+
+- `night/world.js` joins the three simulations. Staff who end the foyer scene in the wrong hall arrive late, and the planner works around them. Change the rules of the night here.
+- `night/mind.js` holds what each character knows and how they answer. An answer may only use that character’s records. `leaks` and `audit` check this independently, so extend them when you add a topic.
+- `night/director.js` is the game master. It plays every interruption and every reply before choosing. `night/worker.js` runs it off the main thread.
+- `night/language.js` turns free text into one instruction. The built-in reader and the local model return the same shape, and `validate` checks both. The model route is `POST /night-say` in `serve.mjs`.
+- `night/app.js`, `night/layout.html` and `night/tour.js` are the page and the guided tour. The tour uses the same actions as a player.
+
+The simulation stays the authority. The page proposes an order and the simulation accepts or refuses it.
 
 ## Change the authoring workflow
 
@@ -18,7 +30,7 @@ npm run build
 npm start
 ```
 
-In a second shell run `npm test`. To use desktop Chrome, run `BROWSER_CHANNEL=chrome npm test`. Set `DEMO_URL` when testing a different local server or the hosted build. The browser tests exercise all original scenes and the game-brief route. Use a local model to verify new wording or changed classifications before updating the saved briefs.
+In a second shell run `npm test`. To use desktop Chrome, run `BROWSER_CHANNEL=chrome npm test`. Set `DEMO_URL` when testing a different local server or the hosted build. The browser tests exercise the night, all original scenes and the game-brief route. The server reads `play.html` once at startup, so restart it after a build. Use a local model to verify new wording or changed classifications before updating the saved briefs.
 
 ## Change the pitch
 

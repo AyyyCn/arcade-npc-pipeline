@@ -10,6 +10,13 @@ const worker = await build({
   write: false,
   platform: "browser",
 });
+const nightWorker = await build({
+  entryPoints: [path("night/worker.js")],
+  bundle: true,
+  minify: true,
+  write: false,
+  platform: "browser",
+});
 const options = {
   entryPoints: [path("entry.js")],
   bundle: true,
@@ -21,7 +28,10 @@ const options = {
       (await readFile(path("THIRD_PARTY_NOTICES.txt"), "utf8")) +
       "\n*/",
   },
-  define: { CROWD_WORKER_SOURCE: JSON.stringify(worker.outputFiles[0].text) },
+  define: {
+    CROWD_WORKER_SOURCE: JSON.stringify(worker.outputFiles[0].text),
+    NIGHT_WORKER_SOURCE: JSON.stringify(nightWorker.outputFiles[0].text),
+  },
   loader: { ".glb": "binary", ".webp": "dataurl", ".html": "text" },
 };
 const shell = await readFile(path("frame.html"), "utf8");

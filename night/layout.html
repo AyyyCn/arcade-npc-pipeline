@@ -1,0 +1,684 @@
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .night {
+    --ink: #1d2e26;
+    --soft: #4a5e50;
+    --green: #294e3e;
+    --rule: #b9bfb0;
+    --paper: #faf9f4;
+    --amber: #b0651d;
+    --dark: #23261f;
+    max-width: 1900px;
+    margin: auto;
+    padding: 14px clamp(14px, 2.2vw, 40px) 26px;
+    color: var(--ink);
+    font:
+      15px/1.35 "Helvetica Neue",
+      Arial,
+      sans-serif;
+  }
+  .night a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+  .night header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .n-brand {
+    font-weight: 720;
+    font-size: 25px;
+    letter-spacing: -0.065em;
+  }
+  .n-product {
+    padding-left: 14px;
+    border-left: 1px solid var(--rule);
+    color: var(--soft);
+  }
+  .n-links {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+    color: var(--soft);
+    font-size: 13.5px;
+  }
+  .n-lede {
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    margin: 10px 0 10px;
+  }
+  .night h1 {
+    font-size: clamp(25px, 2.5vw, 41px);
+    font-weight: 590;
+    line-height: 1.04;
+    letter-spacing: -0.052em;
+    margin: 0;
+    flex: 1;
+    text-wrap: balance;
+  }
+  .n-lede p {
+    margin: 0;
+    max-width: 31em;
+    color: var(--soft);
+    font-size: 14.5px;
+  }
+  .n-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 410px);
+    gap: 16px;
+    align-items: start;
+  }
+  .n-views {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .n-view {
+    position: relative;
+    margin: 0;
+    background: var(--dark);
+    overflow: hidden;
+    border-radius: 3px;
+  }
+  .n-view canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .n-foyer {
+    grid-column: 1 / -1;
+    height: clamp(240px, 32vh, 430px);
+    cursor: pointer;
+  }
+  .n-room {
+    height: clamp(160px, 22vh, 290px);
+  }
+  .n-view.idle canvas {
+    opacity: 0.5;
+  }
+  .n-chip {
+    position: absolute;
+    left: 10px;
+    z-index: 2;
+    padding: 2px 8px;
+    border-radius: 2px;
+    background: #f4efd8ee;
+    color: #263129;
+    font-size: 12px;
+    font-weight: 650;
+    pointer-events: none;
+  }
+  .n-chip.b {
+    top: calc(50% + 8px);
+    background: #cfe6d6ee;
+  }
+  .n-chip.a {
+    top: 8px;
+  }
+  .n-split {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #f2f0e8;
+    z-index: 1;
+  }
+  .n-view figcaption {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    right: 10px;
+    bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+    color: #faf9ef;
+    text-shadow: 0 1px 5px #000b;
+    font-size: 13.5px;
+    pointer-events: none;
+  }
+  .n-view figcaption strong {
+    font-size: 14.5px;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .n-view figcaption span {
+    text-align: right;
+  }
+  .n-halls {
+    position: absolute;
+    z-index: 2;
+    top: 8px;
+    right: 10px;
+    color: #e9e6d6;
+    font-size: 12px;
+    text-shadow: 0 1px 4px #000a;
+    pointer-events: none;
+  }
+  .night .guest-tag {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    background: #f5edcf;
+    color: #243029;
+    border: 1px solid #a9ae8e;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .n-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    background: var(--dark);
+    color: #e9e6d6;
+  }
+  .n-transport {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 9px 0 0;
+  }
+  .night button {
+    font:
+      600 13.5px/1.2 "Helvetica Neue",
+      Arial,
+      sans-serif;
+    padding: 7px 11px;
+    border: 1px solid #7d9384;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--green);
+    cursor: pointer;
+  }
+  .night button:hover:not(:disabled) {
+    background: #e4eadf;
+  }
+  .night button.primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #f8f8ef;
+    min-width: 76px;
+  }
+  .night button.primary:hover:not(:disabled) {
+    background: #1f3d30;
+  }
+  .night button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .night button[aria-pressed="true"] {
+    background: #d9e5d8;
+    border-color: #55705c;
+  }
+  .night :focus-visible {
+    outline: 2px solid #5f7d69;
+    outline-offset: 2px;
+  }
+  .n-speed {
+    display: flex;
+    gap: 4px;
+  }
+  .n-speed button {
+    padding: 7px 8px;
+    min-width: 36px;
+  }
+  .n-track {
+    position: relative;
+    height: 34px;
+  }
+  .n-track input {
+    position: absolute;
+    inset: 9px 0 auto;
+    width: 100%;
+    margin: 0;
+    accent-color: var(--green);
+  }
+  .n-marks i {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 8px;
+    background: var(--soft);
+  }
+  .n-marks i.gm {
+    background: var(--amber);
+  }
+  .n-marks i.you {
+    background: #1c7a55;
+    height: 10px;
+    width: 3px;
+  }
+  .n-marks span {
+    position: absolute;
+    top: 25px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--soft);
+    white-space: nowrap;
+  }
+  .n-clock {
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    min-width: 132px;
+    text-align: right;
+  }
+  .n-clock small {
+    display: block;
+    font-weight: 400;
+    color: var(--soft);
+    font-size: 12px;
+  }
+  .n-side {
+    display: grid;
+    gap: 12px;
+  }
+  .n-card {
+    border-top: 2px solid var(--ink);
+    padding-top: 8px;
+  }
+  .n-card h2 {
+    margin: 0 0 6px;
+    font-size: 13.5px;
+    color: var(--soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .n-card h2 small {
+    font-weight: 400;
+    font-size: 12px;
+  }
+  .n-card p {
+    margin: 5px 0;
+  }
+  .n-moods {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 7px;
+  }
+  .n-gm strong {
+    color: var(--amber);
+  }
+  .n-hint {
+    font-size: 13px;
+    color: var(--soft);
+  }
+  .n-hint button {
+    padding: 2px 7px;
+    font-size: 12px;
+  }
+  .n-who {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+  }
+  .n-who button {
+    padding: 4px 8px;
+    font-size: 12.5px;
+  }
+  .n-who select {
+    font: inherit;
+    font-size: 12.5px;
+    padding: 3px 4px;
+    border: 1px solid #9eaa9c;
+    border-radius: 3px;
+    background: var(--paper);
+    color: var(--ink);
+    max-width: 118px;
+  }
+  .n-person {
+    margin: 8px 0 6px;
+    font-size: 17px;
+    font-weight: 620;
+    letter-spacing: -0.02em;
+  }
+  .n-person span {
+    font-weight: 400;
+    font-size: 13.5px;
+    color: var(--soft);
+    letter-spacing: 0;
+  }
+  .n-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .n-quick button {
+    padding: 4px 8px;
+    font-size: 12.5px;
+  }
+  .n-orders {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .n-orders button {
+    border-color: #1c7a55;
+    color: #145c40;
+  }
+  .n-say {
+    display: flex;
+    gap: 5px;
+    margin-top: 7px;
+  }
+  .n-say input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    padding: 7px 9px;
+    border: 1px solid #9eaa9c;
+    border-radius: 3px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .n-log {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: clamp(170px, 36vh, 460px);
+    overflow-y: auto;
+    display: grid;
+    gap: 7px;
+  }
+  .n-log li {
+    padding: 7px 9px;
+    background: var(--paper);
+    border: 1px solid #d5d8cb;
+    border-radius: 3px;
+  }
+  .n-log li.order {
+    border-left: 3px solid #1c7a55;
+  }
+  .n-log li.refused {
+    border-left: 3px solid var(--amber);
+  }
+  .n-log .q {
+    color: var(--soft);
+    font-size: 12.5px;
+  }
+  .n-log .a {
+    margin: 2px 0 3px;
+  }
+  .n-log .a b {
+    font-weight: 650;
+  }
+  .n-log .basis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .n-log .basis span {
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    background: #e6e9dc;
+    color: #3d5144;
+    font-variant-numeric: tabular-nums;
+  }
+  .n-log .basis span.none {
+    background: #f1dfc6;
+    color: #6f4311;
+  }
+  .n-out {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  .n-out th,
+  .n-out td {
+    text-align: left;
+    padding: 4px 6px 4px 0;
+    border-top: 1px solid #d5d8cb;
+    font-weight: 400;
+    vertical-align: top;
+  }
+  .n-out thead th {
+    border: 0;
+    font-size: 12px;
+    color: var(--soft);
+  }
+  .n-out tr:last-child td {
+    font-weight: 620;
+  }
+  .n-outcome {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+  }
+  .n-out .bad {
+    color: #a3451a;
+  }
+  .n-out .good {
+    color: #1c6b49;
+  }
+  .n-result {
+    margin: 8px 0 0 !important;
+    padding: 7px 10px;
+    border-radius: 3px;
+    font-weight: 620;
+    font-size: 15.5px;
+    letter-spacing: -0.015em;
+  }
+  .n-result.good {
+    background: #d5e8d8;
+    color: #14492f;
+  }
+  .n-result.bad {
+    background: #f1dcc9;
+    color: #7a2f0e;
+  }
+  .n-proof {
+    margin-top: 16px;
+    padding-top: 9px;
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    font-size: 13px;
+    color: var(--soft);
+  }
+  .n-proof b {
+    display: block;
+    color: var(--ink);
+    font-size: 13.5px;
+  }
+  .n-tour {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    max-width: 78%;
+    padding: 7px 13px;
+    background: #f4efd8f5;
+    color: #23301f;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 12px #0006;
+  }
+  @media (max-width: 980px) {
+    .n-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .n-lede {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .n-proof {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 620px) {
+    .n-views {
+      grid-template-columns: 1fr;
+    }
+    .n-transport {
+      grid-template-columns: auto 1fr;
+    }
+    .n-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .n-links a:first-child {
+      display: none;
+    }
+    .n-halls {
+      display: none;
+    }
+  }
+</style>
+<main class="night">
+  <header>
+    <span class="n-brand">Arcade</span
+    ><span class="n-product">One night at Side B</span>
+    <div class="n-links">
+      <a href="?pipeline">Game brief</a><a href="?home">Original scenes</a>
+    </div>
+  </header>
+  <div class="n-lede">
+    <h1>The gig just moved halls. You get two sentences to save it.</h1>
+    <p>
+      Forty people, one clock. What each person hears decides where they go,
+      who turns up for work and when the show can start. Ask anyone anything.
+      They answer from their own records.
+    </p>
+  </div>
+  <div class="n-grid">
+    <section class="n-views" aria-label="The venue">
+      <figure class="n-view n-foyer" id="n-foyer">
+        <canvas id="n-crowd" aria-label="Foyer and both halls"></canvas>
+        <span class="n-chip a" id="n-chip-a">If you say nothing</span>
+        <span class="n-chip b">Your night</span>
+        <span class="n-halls">West Hall · foyer · East Hall</span>
+        <i class="n-split"></i>
+        <span id="tag-a" class="guest-tag" hidden></span
+        ><span id="tag-b" class="guest-tag" hidden></span>
+        <div class="n-tour" id="n-tour" role="status" hidden></div>
+        <figcaption>
+          <strong>Foyer</strong><span id="n-cap-crowd"></span>
+        </figcaption>
+        <div class="n-loading" id="n-loading" role="status">
+          Opening the venue…
+        </div>
+      </figure>
+      <figure class="n-view n-room idle" id="n-fig-stage">
+        <canvas id="n-stage" aria-label="East Hall stage"></canvas>
+        <figcaption>
+          <strong>East Hall stage</strong><span id="n-cap-stage"></span>
+        </figcaption>
+      </figure>
+      <figure class="n-view n-room idle" id="n-fig-archive">
+        <canvas id="n-archive" aria-label="Record archive"></canvas>
+        <figcaption>
+          <strong>Archive</strong><span id="n-cap-archive"></span>
+        </figcaption>
+      </figure>
+      <div class="n-transport">
+        <button id="n-play" class="primary" disabled>Play</button>
+        <div class="n-speed" role="group" aria-label="Speed">
+          <button data-speed="1">1×</button
+          ><button data-speed="2" aria-pressed="true">2×</button
+          ><button data-speed="5">5×</button>
+        </div>
+        <div class="n-track">
+          <div class="n-marks" id="n-marks"></div>
+          <input
+            id="n-scrub"
+            type="range"
+            min="0"
+            max="700"
+            value="0"
+            aria-label="Night clock"
+          />
+        </div>
+        <div class="n-clock">
+          <span id="n-time">0.0 s</span><small id="n-act"></small>
+        </div>
+      </div>
+      <section class="n-card n-outcome" aria-label="Outcome">
+        <h2>Opening night <small id="n-verdict"></small></h2>
+        <table class="n-out">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Reach East Hall</th>
+              <th>Staff who start late</th>
+              <th>Record at the desk</th>
+              <th>Opening cue</th>
+            </tr>
+          </thead>
+          <tbody id="n-out"></tbody>
+        </table>
+        <p class="n-result" id="n-result" role="status" hidden></p>
+      </section>
+    </section>
+    <aside class="n-side">
+      <section class="n-card n-gm" aria-label="Game master">
+        <h2>
+          Game master <small id="n-gm-status" role="status">thinking…</small>
+        </h2>
+        <div class="n-moods" role="group" aria-label="Mood">
+          <button data-mood="quiet">Quiet night</button
+          ><button data-mood="tense" aria-pressed="true">Tense</button
+          ><button data-mood="knife">Knife-edge</button>
+        </div>
+        <p id="n-gm-text">
+          The game master is playing through every way tonight could go wrong.
+        </p>
+        <p class="n-hint" id="n-gm-hint" hidden></p>
+      </section>
+      <section class="n-card" aria-label="Talk">
+        <h2>
+          Talk to anyone <small id="n-reader"></small>
+        </h2>
+        <div class="n-who" id="n-who"></div>
+        <p class="n-person" id="n-person"></p>
+        <div class="n-quick" id="n-quick"></div>
+        <div class="n-orders" id="n-orders"></div>
+        <form class="n-say" id="n-say">
+          <input
+            id="n-input"
+            maxlength="140"
+            autocomplete="off"
+            placeholder="Say anything. “Otto, the show moved to East Hall.”"
+            aria-label="Say something"
+          /><button>Say</button>
+        </form>
+        <ul class="n-log" id="n-log" aria-live="polite"></ul>
+      </section>
+    </aside>
+  </div>
+  <footer class="n-proof" aria-label="How this was made">
+    <div><b id="n-proof-seed"></b>Every number on this page replays from it.</div>
+    <div>
+      <b id="n-proof-audit">Checking answers…</b
+      ><span id="n-proof-audit-note"></span>
+    </div>
+    <div><b id="n-proof-gm"></b><span id="n-proof-gm-note"></span></div>
+    <div><b id="n-proof-lang"></b><span id="n-proof-lang-note"></span></div>
+  </footer>
+</main>

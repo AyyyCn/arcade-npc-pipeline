@@ -151,17 +151,26 @@ function assemble(jobs, members, entries, tracks) {
     end: Math.max(...entries.map((e) => e.end)),
   };
 }
-export function initialPlan(jobs, members = crew) {
+// Crew who are still on their way come in through the stage door when they arrive.
+export const stageDoor = (i) => ({ x: -6.3, z: 3.2 - i * 0.72 });
+export function initialPlan(jobs, members = crew, late = []) {
+  const from = (m, i) => (late[i] > 0 ? stageDoor(i) : m.home);
   const entries = solve(
     jobs,
     members,
-    members.map((m) => ({ free: 0, at: m.home })),
+    members.map((m, i) => ({ free: late[i] ?? 0, at: from(m, i) })),
     {},
     jobs,
   );
   if (members === crew) {
-    const physical = execute(members, entries);
-    return assemble(jobs, members, physical.entries, physical.tracks);
+    const physical = execute(members, entries, {
+      initial: members.map(from),
+      late,
+    });
+    return {
+      ...assemble(jobs, members, physical.entries, physical.tracks),
+      late,
+    };
   }
   return assemble(jobs, members, entries, tracksFor(entries, members));
 }
@@ -173,7 +182,7 @@ export function positionAt(part, t) {
   );
 }
 export function memberState(plan, id, t) {
-  let at = plan.members[id].home,
+  let at = plan.late?.[id] > 0 ? stageDoor(id) : plan.members[id].home,
     last = null;
   for (const part of plan.tracks[id]) {
     if (t < part.start) break;
@@ -225,8 +234,9 @@ export function recover(
     fixed = {},
     prefix = [],
     remainders = new Map();
+  const late = base.late ?? [];
   const available = members.map((m, i) => ({
-    free: t + (absent === i ? awayTicks : 0),
+    free: Math.max(t + (absent === i ? awayTicks : 0), late[i] ?? 0),
     at: copy(memberState(base, i, t)),
   }));
   for (const e of base.entries) {
@@ -276,6 +286,7 @@ export function recover(
         finished: fixed,
         active,
         incident,
+        late,
       })
     : { entries: suffix, tracks: tracksFor(suffix, members) };
   const tracks = base.tracks.map((track, id) => {
@@ -299,6 +310,7 @@ export function recover(
   const candidate = {
     ...assemble(jobs, members, [...prefix, ...next.entries], tracks),
     incident,
+    late,
   };
   if (onStage && !keepTeams) {
     const fixedPlan = recover(base, t, absent, awayTicks, { keepTeams: true });

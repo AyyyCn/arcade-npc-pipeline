@@ -46,6 +46,7 @@ export function execute(
     finished = {},
     active = [],
     incident,
+    late = [],
   } = {},
 ) {
   const queues = members.map((m) =>
@@ -64,6 +65,7 @@ export function execute(
     Math.max(
       start,
       incident?.until ?? 0,
+      ...late.map((t) => t ?? 0),
       ...assignment.map((e) => e.job.release ?? 0),
     ) +
     assignment.reduce((sum, e) => sum + e.job.ticks, 0) +
@@ -82,7 +84,10 @@ export function execute(
       (!incident || t >= incident.until)
     )
       return { entries, tracks };
-    const onCall = (i) => incident?.absent === i && t < incident.until;
+    // Someone who has not reached the hall yet is as unavailable as someone on the radio.
+    const arriving = (i) => t < (late[i] ?? 0);
+    const onCall = (i) =>
+      arriving(i) || (incident?.absent === i && t < incident.until);
     const atWork = (i) => running.find((e) => e.team.includes(i));
     for (let i = pending.length - 1; i >= 0; i--) {
       const e = pending[i],
@@ -157,7 +162,9 @@ export function execute(
             job.team.indexOf(id),
             job.job.id,
           )
-        : m.park;
+        : arriving(id)
+          ? from
+          : m.park;
       const blocked = [cartBox(rack, nextRack)];
       for (const other of members)
         if (other.id !== id)
@@ -174,8 +181,10 @@ export function execute(
         goal = m.park;
       next[id] = nextFootstep(from, goal, blocked, m.pace / HZ);
       types[id] = {
-        kind: away
-          ? "away"
+        kind: arriving(id)
+          ? "late"
+          : away
+            ? "away"
           : distance(from, next[id]) > 1e-6
             ? "walk"
             : assigned

@@ -1,6 +1,7 @@
 import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { interpretBrief } from "./pipeline/model.js";
+import { interpret as interpretNight } from "./night/language.js";
 
 const model = process.env.MODEL_URL;
 const port = Number(process.env.PORT || 19447);
@@ -62,7 +63,7 @@ http
     }
     if (
       req.method !== "POST" ||
-      !["/interpret", "/game-brief"].includes(path)
+      !["/interpret", "/game-brief", "/night-say"].includes(path)
     ) {
       json(404, {});
       return;
@@ -99,6 +100,25 @@ http
         }
         try {
           json(200, { facts: await interpretBrief(input.prompt, model) });
+        } catch (error) {
+          json(422, { error: error.message });
+        }
+        return;
+      }
+      if (path === "/night-say") {
+        const selected = Number.isInteger(input.selected) ? input.selected : null;
+        if (
+          typeof input.text !== "string" ||
+          !input.text.trim() ||
+          input.text.length > 140
+        ) {
+          json(400, {});
+          return;
+        }
+        try {
+          json(200, {
+            intent: await interpretNight(input.text, selected, model),
+          });
         } catch (error) {
           json(422, { error: error.message });
         }

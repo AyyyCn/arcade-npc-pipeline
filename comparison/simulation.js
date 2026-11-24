@@ -12,6 +12,10 @@ export const WALL = 4.7;
 export const DOOR = 1.45;
 export const HEARING = 2.35;
 export const PERSONAL_SPACE = 0.56;
+// Receipt sources that are not guests.
+export const PROGRAMME = -1,
+  RADIO = -2,
+  PLAYER = -3;
 const TALK = 6;
 const BOUND_X = 12.3,
   BOUND_Z = 4.4;
@@ -118,8 +122,21 @@ function issue(world, who, from) {
 function busy(g, t) {
   return g.partner >= 0 && g.doneAt >= t;
 }
+// One hold is the original experiment. A night can also carry a list of holds and direct tells.
 const held = (world, id, hold) =>
-  id === hold && world.tick > FORK && world.tick <= FORK + HOLD;
+  (id === hold && world.tick > FORK && world.tick <= FORK + HOLD) ||
+  (world.holds?.some(
+    (h) => h.id === id && world.tick > h.from && world.tick <= h.to,
+  ) ??
+    false);
+function interrupt(w, id) {
+  const guest = w.guests[id],
+    other = w.guests[guest.partner];
+  if (other) {
+    guest.partner = other.partner = -1;
+    guest.outgoing = other.outgoing = false;
+  }
+}
 
 function finishExchanges(w, hold) {
   for (const speaker of w.guests) {
@@ -294,15 +311,13 @@ function reserveStep(g, intent, near, accepted) {
 export function step(w, hold = -1) {
   w.tick++;
   if (w.tick === CHANGE) issue(w, w.manager, -2);
-  if (w.tick === FORK + 1 && hold >= 0) {
-    // Cancel a conversation already in flight. A partially delivered fact creates no receipt.
-    const guest = w.guests[hold],
-      other = w.guests[guest.partner];
-    if (other) {
-      guest.partner = other.partner = -1;
-      guest.outgoing = other.outgoing = false;
-    }
-  }
+  // Cancel a conversation already in flight. A partially delivered fact creates no receipt.
+  if (w.tick === FORK + 1 && hold >= 0) interrupt(w, hold);
+  for (const h of w.holds ?? []) if (w.tick === h.from + 1) interrupt(w, h.id);
+  // The player speaks to one guest. Someone who already has the news gets no new receipt.
+  for (const t of w.tells ?? [])
+    if (t.tick === w.tick && w.receipts[w.guests[t.id].memory].version < 2)
+      issue(w, t.id, PLAYER);
   finishExchanges(w, hold);
   const near = neighbors(w.guests);
   findListeners(w, near, hold);
@@ -346,6 +361,45 @@ function run(w, hold, frames) {
     step(w, hold);
     if (frames) sample(w, frames);
   }
+}
+// Play one complete night with any number of holds and tells. `from` resumes a world saved by
+// `snapshot`, and `frames: false` skips the presentation samples when only the outcome matters.
+export function play(
+  seed,
+  { holds = [], tells = [], frames: record = true, from = null } = {},
+) {
+  const w = from ? structuredClone(from) : makeWorld(seed),
+    frames = record ? new Float32Array((END + 1) * COUNT * STRIDE) : null;
+  w.holds = holds;
+  w.tells = tells;
+  if (frames) sample(w, frames);
+  run(w, -1, frames);
+  return {
+    seed,
+    frames,
+    receipts: w.receipts,
+    manager: w.manager,
+    guests: w.guests.map(({ id, name, rig, shirt, height, group, told }) => ({
+      id,
+      name,
+      rig,
+      shirt,
+      height,
+      group,
+      told,
+    })),
+    final: w.guests.map((g) => ({ x: g.x, z: g.z, memory: g.memory })),
+    halls: w.guests.map((g) => hall(g.x)),
+    east: w.guests.filter((g) => hall(g.x) === 1).length,
+  };
+}
+// The world as it stands after `tick` ticks, ready to be resumed many times.
+export function snapshot(seed, { holds = [], tells = [] } = {}, tick) {
+  const w = makeWorld(seed);
+  w.holds = holds;
+  w.tells = tells;
+  while (w.tick < tick) step(w);
+  return w;
 }
 export function prepare(seed) {
   const w = makeWorld(seed),

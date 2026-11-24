@@ -16,7 +16,8 @@ function glowMaterial(color, opacity = 1) {
     side: T.DoubleSide,
   });
 }
-export async function createView(canvas) {
+// `stacked` puts the two runs one above the other at any width. The night view uses it.
+export async function createView(canvas, { stacked: alwaysStacked = false } = {}) {
   const renderer = new T.WebGLRenderer({
     canvas,
     antialias: true,
@@ -119,7 +120,8 @@ export async function createView(canvas) {
   function layout() {
     const w = canvas.clientWidth,
       h = canvas.clientHeight,
-      stacked = window.matchMedia("(max-width: 680px)").matches;
+      stacked =
+        alwaysStacked || window.matchMedia("(max-width: 680px)").matches;
     const key = w + "/" + h + "/" + stacked;
     if (size === key) return;
     size = key;
@@ -141,7 +143,8 @@ export async function createView(canvas) {
   function render(trace, time, idx, info, zoom) {
     const rect = viewports[idx];
     const ratio = rect.w / rect.h;
-    const halfHeight = Math.max(5.6, 14.15 / ratio) / (1 + zoom * 1.23);
+    const halfHeight =
+      Math.max(alwaysStacked ? 4.75 : 5.6, 14.15 / ratio) / (1 + zoom * 1.23);
     Object.assign(camera, {
       left: -halfHeight * ratio,
       right: halfHeight * ratio,
@@ -205,11 +208,18 @@ export async function createView(canvas) {
         canvas.clientHeight - rect.y - ((point.y + 1) * rect.h) / 2 - 3 + "px";
       tag.textContent =
         info.guests[focus].name +
-        (zoom > 0.48 && idx === 1 && time > FORK && time <= FORK + HOLD
+        (zoom > 0.48 &&
+        (idx === 1 || info.both) &&
+        time > FORK &&
+        time <= FORK + HOLD
           ? " · held"
           : "");
     }
-    stopped.visible = idx === 1 && time > FORK && time <= FORK + HOLD;
+    stopped.visible =
+      (idx === 1 || info.both) &&
+      info.held !== false &&
+      time > FORK &&
+      time <= FORK + HOLD;
     const held = poses[info.hold];
     stopped.position.set(held.x, 1.04, held.z);
     let vertex = 0;
@@ -250,6 +260,7 @@ export async function createView(canvas) {
       layout();
       renderer.setScissorTest(true);
       const zoom =
+        (info.zoom ?? 1) *
         T.MathUtils.smoothstep(time, FORK - 16, FORK + 3) *
         (1 - T.MathUtils.smoothstep(time, FORK + HOLD + 3, FORK + HOLD + 24));
       const anchor = readGuest(original, FORK, info.hold);

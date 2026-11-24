@@ -2,12 +2,15 @@ import listening from "./listening-layout.html";
 import comparison from "./comparison/layout.html";
 import home from "./suite/layout.html";
 import pipeline from "./pipeline/layout.html";
+import night from "./night/layout.html";
 import lab from "./npc/lab.html";
 import navStyle from "./npc/nav.html";
 import { navigation } from "./npc/navigation.js";
 const query = new URLSearchParams(location.search);
 const mode =
-  !location.search || query.has("pipeline")
+  !location.search || query.has("night")
+    ? "night"
+    : query.has("pipeline")
     ? "pipeline"
     : query.has("crew")
       ? "crew"
@@ -26,6 +29,7 @@ const guided = ["screening", "pitch", "slide", "deck", "film"].some((k) =>
 document.title =
   {
     home: "NPC Systems",
+    night: "One night",
     pipeline: "NPC Pipeline",
     social: "Social memory",
     room: "Listening room",
@@ -33,7 +37,9 @@ document.title =
     perception: "Perception & search",
   }[mode] + " · Side B";
 document.querySelector("#app").outerHTML =
-  mode === "pipeline"
+  mode === "night"
+    ? night
+    : mode === "pipeline"
     ? pipeline
     : mode === "room"
       ? listening
@@ -42,13 +48,14 @@ document.querySelector("#app").outerHTML =
         : mode === "home"
           ? home
           : lab;
-if (!guided && mode !== "pipeline") {
+if (!guided && mode !== "pipeline" && mode !== "night") {
   document.head.insertAdjacentHTML("beforeend", navStyle);
   document.body.prepend(navigation(mode === "room" ? "social" : mode));
 }
 if (query.has("deck")) document.body.classList.add("deck");
 if (query.has("film")) document.body.classList.add("film");
-if (mode === "pipeline") import("./pipeline/app.js");
+if (mode === "night") import("./night/app.js");
+else if (mode === "pipeline") import("./pipeline/app.js");
 else if (mode === "room") import("./play.js");
 else if (mode === "social") import("./comparison/app.js");
 else if (mode === "crew") import("./crew/app.js");

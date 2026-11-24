@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "side-b",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 19447
+    }
+  ]
+}
