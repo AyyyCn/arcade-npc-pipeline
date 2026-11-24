@@ -4,8 +4,20 @@
     {
       "name": "side-b",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeArgs": [
+        "start"
+      ],
       "port": 19447
+    },
+    {
+      "name": "side-b-model",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/adam/arcade-npc-pipeline && MODEL_URL=http://127.0.0.1:19442 node serve.mjs"
+      ],
+      "port": 19447,
+      "url": "http://127.0.0.1:19447"
     }
   ]
 }

@@ -47,6 +47,14 @@ Open [the night](http://127.0.0.1:19447/) or [the local game brief](http://127.0
 MODEL_URL=http://127.0.0.1:19442 npm start
 ```
 
+With a model connected, the night reads any phrasing in its “Say anything” box. For example, with llama.cpp:
+
+```sh
+llama-server -m qwen2.5-1.5b-instruct-q4_k_m.gguf --port 19442
+```
+
+`MODEL_URL=http://127.0.0.1:19442 npm run check:model` scores the reading against the running model.
+
 For a static site use `npm run build:site`. The output is in `site/`.
 
 ## Source and pitch materials

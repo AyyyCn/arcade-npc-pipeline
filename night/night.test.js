@@ -152,25 +152,37 @@ test("free text becomes one checked instruction", () => {
 });
 
 test("a local model's reading is constrained to the same instruction", async () => {
-  let seen;
+  const seen = [];
+  // A stand-in for the model: it answers each constrained question with one allowed word.
   const server = http.createServer(async (req, res) => {
     let body = "";
     for await (const chunk of req) body += chunk;
-    seen = JSON.parse(body);
+    const request = JSON.parse(body);
+    seen.push(request);
+    const word = request.grammar.includes('"tell"')
+      ? request.messages.at(-1).content.includes("radio")
+        ? "call"
+        : "ask"
+      : "whereis";
     res.setHeader("Content-Type", "application/json");
-    res.end(
-      JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ act: "ask", who: "nobody", topic: "whereis", about: "Nina", state: "open", correct: false }) } }],
-      }),
-    );
+    res.end(JSON.stringify({ choices: [{ message: { content: word } }] }));
   });
   await new Promise((done) => server.listen(0, "127.0.0.1", done));
   try {
     const url = "http://127.0.0.1:" + server.address().port;
-    const intent = await interpret("seen the stage manager?", id("kit"), url);
-    assert.deepEqual(intent, { act: "ask", who: id("kit"), topic: "whereis", about: id("nina"), correct: false });
-    assert.equal(seen.response_format.schema.properties.act.enum.includes("tell"), true);
-    assert.match(seen.messages.at(-1).content, /Listener: Kit/);
+    // The model picks the kind of sentence. The names come from the cast list.
+    assert.deepEqual(await interpret("is Nina around?", id("kit"), url), {
+      act: "ask",
+      who: id("kit"),
+      topic: "whereis",
+      about: id("nina"),
+      correct: false,
+    });
+    assert.match(seen[0].grammar, /^root ::= "ask" \| "tell" \| "call" \| "screen"$/);
+    assert.equal(seen[0].temperature, 0);
+    // Only crew carry radios, whatever the model says.
+    assert.equal((await interpret("Kit, get on the radio", null, url)).act, "ask");
+    assert.equal((await interpret("Wes, get on the radio", null, url)).act, "call");
   } finally {
     server.close();
   }

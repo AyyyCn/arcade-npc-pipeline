@@ -198,8 +198,10 @@ function perform(intent, text) {
   return refuse(text, "Say who you’re talking to, or pick someone in the venue.");
 }
 async function say(text) {
-  let intent = null;
-  if (live)
+  let intent = null,
+    reader = "Built-in reader";
+  if (live) {
+    const began = performance.now();
     try {
       const response = await fetch("/night-say", {
         method: "POST",
@@ -207,11 +209,17 @@ async function say(text) {
         body: JSON.stringify({ text, selected }),
         signal: AbortSignal.timeout(13000),
       });
-      if (response.ok) intent = validate((await response.json()).intent);
+      if (response.ok) {
+        intent = validate((await response.json()).intent);
+        reader = "Read by the local model in " + Math.round(performance.now() - began) + " ms";
+      }
     } catch {
       intent = null;
     }
-  push(perform(intent ?? read(text, selected), text));
+  }
+  const entry = perform(intent ?? read(text, selected), text);
+  entry.reader = reader;
+  push(entry);
 }
 
 // ---- Drawing ----
@@ -242,7 +250,10 @@ function drawLog() {
   $("n-log").replaceChildren(
     ...log.map((e) => {
       const li = node("li", { className: e.kind });
-      if (e.you) li.append(node("div", { className: "q" }, "You · " + e.you));
+      if (e.you)
+        li.append(
+          node("div", { className: "q" }, "You · " + e.you, ...(e.reader ? [node("em", {}, e.reader)] : [])),
+        );
       if (e.kind === "ask") {
         li.append(node("div", { className: "a" }, node("b", {}, nameOf(e.id) + " · " + stamp(e.at) + "  "), e.text));
         li.append(

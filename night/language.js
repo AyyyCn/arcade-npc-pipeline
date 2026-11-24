@@ -91,57 +91,135 @@ export function validate(intent) {
   return { act: "ask", who: intent.who, topic: topic === "whereis" && about == null ? "other" : topic, about, correct };
 }
 
-const schema = {
-  type: "object",
-  properties: {
-    act: { type: "string", enum: acts },
-    who: { type: "string", enum: [...people.map((p) => p.name), "nobody"] },
-    topic: { type: "string", enum: askTopics },
-    about: { type: "string", enum: [...people.map((p) => p.name), "nobody"] },
-    state: { type: "string", enum: ["open", "closed"] },
-    correct: { type: "boolean" },
-  },
-  required: ["act", "who", "topic", "about", "state", "correct"],
-  additionalProperties: false,
-};
-const example = (user, reply) => [
-  { role: "user", content: user },
-  { role: "assistant", content: JSON.stringify(reply) },
-];
-const blank = { who: "nobody", topic: "other", about: "nobody", state: "open", correct: false };
-
-// Ask an OpenAI-compatible local model for the same instruction. The output is constrained to the
-// schema and then validated, so the model can choose among moves but cannot invent one.
-export async function interpret(text, selected, modelUrl) {
-  const listener = selected == null ? "nobody" : people[selected].name;
+// One constrained word from an OpenAI-compatible local model. The grammar limits the reply to the
+// listed choices, so the model can pick a move but cannot invent one.
+async function choice(modelUrl, system, shots, text, options) {
   const response = await fetch(new URL("/v1/chat/completions", modelUrl), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(12000),
+    signal: AbortSignal.timeout(8000),
     body: JSON.stringify({
       temperature: 0,
       seed: 42,
-      max_tokens: 96,
-      response_format: { type: "json_object", schema },
+      max_tokens: 6,
+      grammar: "root ::= " + options.map((o) => JSON.stringify(o)).join(" | "),
       messages: [
-        {
-          role: "system",
-          content:
-            "Turn what the player says at a record shop gig into one instruction. act: ask = a question for a character; tell = give a character the news that the show moved to East Hall; call = radio a crew member away; screen = open or close the archive screen; none = anything else. who = the character addressed, or the current listener when no name is given. topic for ask: venue (where the show is), source (who told them), told (who they told), doing (what they are doing or why), record (the reference record), crowd (how many people), whereis (where another person is; put that person in about), other. correct = true when the player is replacing their previous order. Return JSON.",
-        },
-        ...example("Listener: nobody. Player: Ada, who told you about the move?", { ...blank, act: "ask", who: "Ada", topic: "source" }),
-        ...example("Listener: Kit. Player: have you seen Nina anywhere?", { ...blank, act: "ask", who: "Kit", topic: "whereis", about: "Nina" }),
-        ...example("Listener: nobody. Player: Otto, the gig is in East Hall now.", { ...blank, act: "tell", who: "Otto" }),
-        ...example("Listener: nobody. Player: actually, let Vera know instead", { ...blank, act: "tell", who: "Vera", correct: true }),
-        ...example("Listener: Wes. Player: get on the radio, I need you", { ...blank, act: "call", who: "Wes" }),
-        ...example("Listener: nobody. Player: fold the archive screen back", { ...blank, act: "screen", state: "open" }),
-        ...example("Listener: Ida. Player: what's the best pizza in town?", { ...blank, act: "ask", who: "Ida", topic: "other" }),
-        { role: "user", content: "Listener: " + listener + ". Player: " + text },
+        { role: "system", content: system },
+        ...shots.flatMap(([user, reply]) => [
+          { role: "user", content: user },
+          { role: "assistant", content: reply },
+        ]),
+        { role: "user", content: text },
       ],
     }),
   });
   if (!response.ok) throw Error("The local model could not read this.");
-  const raw = JSON.parse((await response.json()).choices[0].message.content);
-  const id = (name) => people.find((p) => p.name === name)?.index ?? null;
-  return validate({ ...raw, who: id(raw.who) ?? selected, about: id(raw.about) });
+  const word = (await response.json()).choices?.[0]?.message?.content?.trim();
+  if (!options.includes(word)) throw Error("Unrecognized response");
+  return word;
+}
+const actShots = [
+  ["Bo, how did you find out?", "ask"],
+  ["what are you up to right now", "ask"],
+  ["Is the room filling up?", "ask"],
+  ["anyone seen Lark?", "ask"],
+  ["do you like jazz?", "ask"],
+  ["tell me a joke", "ask"],
+  ["Cora, the concert has moved to East Hall", "tell"],
+  ["let Hugo know it's in the other hall now", "tell"],
+  ["you should go to East Hall, the show is there", "tell"],
+  ["Sam, heads up, it's in East Hall tonight", "tell"],
+  ["write me a story", "ask"],
+  ["Maya, pick up your radio", "call"],
+  ["I need Esme on a call, take her off the job", "call"],
+  ["slide the screen out of the way in the archive", "screen"],
+  ["put the divider back so she can't see", "screen"],
+  ["the partition is blocking her view, shift it", "screen"],
+];
+const topicShots = [
+  ["where is the gig happening?", "venue"],
+  ["which hall should I go to", "venue"],
+  ["where are you headed for the show", "venue"],
+  ["who gave you that information?", "source"],
+  ["how do you know about it", "source"],
+  ["where did you hear that", "source"],
+  ["who have you passed it on to?", "told"],
+  ["did you let anybody else know", "told"],
+  ["have you shared the news with someone", "told"],
+  ["what are you busy with?", "doing"],
+  ["why are you standing around", "doing"],
+  ["what is taking so long", "doing"],
+  ["why are you late", "doing"],
+  ["have you found the album yet?", "record"],
+  ["which bin is the vinyl in", "record"],
+  ["where did the sleeve end up", "record"],
+  ["how full is the hall?", "crowd"],
+  ["how many people showed up", "crowd"],
+  ["have you seen Lark around?", "whereis"],
+  ["where did Hugo go", "whereis"],
+  ["do you know where Cora is", "whereis"],
+  ["what's the weather like?", "other"],
+  ["sing me a song", "other"],
+  ["what do you think of the mayor", "other"],
+];
+const stateShots = [
+  ["fold the screen back", "open"],
+  ["get the divider out of her way", "open"],
+  ["clear her line of sight", "open"],
+  ["pull the screen across", "closed"],
+  ["block her view of the bins", "closed"],
+];
+
+// The model decides what kind of sentence this is. Names are matched against the cast list, so
+// the model is never trusted to produce one. The result is validated like any other instruction.
+export async function interpret(text, selected, modelUrl) {
+  const names = namesIn(text);
+  const correct = /^(actually|no[,.! ]|wait|instead|scratch|scrap|sorry)|\binstead\b/i.test(text.trim());
+  const act = await choice(
+    modelUrl,
+    "A player at a record shop gig says one sentence. Classify it with one word. ask = any question or request for a character to answer. tell = the player gives someone the news that the show moved to East Hall. call = the player gets a crew member on the radio or pulls them off their job. screen = the player moves the screen, divider or partition in the archive.",
+    actShots,
+    text,
+    ["ask", "tell", "call", "screen"],
+  );
+  if (act === "screen") {
+    const state = await choice(
+      modelUrl,
+      "The player moves the archive screen. Answer open if the sentence clears the view, or closed if it blocks the view.",
+      stateShots,
+      text,
+      ["open", "closed"],
+    );
+    return validate({ act, state, correct });
+  }
+  // A name addresses someone when it opens or closes the sentence, or when nobody is selected.
+  // Otherwise the player is talking to the selected person about somebody else.
+  const first = names.length ? people[names[0]].name : "";
+  const vocative =
+    names.length > 0 &&
+    new RegExp("^(?:ask |tell |hey |ok |so )?" + first + "\\b|,\\s*" + first + "[?.!]*$", "i").test(text.trim());
+  const addressed = selected == null || vocative || /\b(tell|let|warn|inform|radio|call)\b/i.test(text);
+  const who = (addressed ? names[0] : null) ?? selected;
+  const others = addressed ? names.slice(1) : names;
+  if (who == null) return validate({ act: "none", correct });
+  // Checks the cast list and the sentence can settle without the model. Only crew carry radios,
+  // a radio call has to mention one, and a tell has to carry the news.
+  const news = /\beast\b|\bmoved?\b|\bvenue\b|\bhall\b|address|changed|relocat|other room|switched/i.test(text);
+  const paging = /\bradio\b|\bcall\b|\bpage\b|walkie|step (out|away)|\boff the\b|a word with/i.test(text);
+  let kind = act;
+  // An order that takes someone off their job has to say so.
+  if (kind === "call" && (!crewKeys.has(people[who].key) || !paging)) kind = news ? "tell" : "ask";
+  // A correction inherits the news from the order it replaces.
+  if (kind === "tell" && !news && !correct) kind = "ask";
+  if (kind !== "ask") return validate({ act: kind, who, correct });
+  const topic = await choice(
+    modelUrl,
+    "Classify a question put to a character at a record shop gig with one word. venue = where the show is or where to go. source = who told them or how they know. told = who they passed the news to. doing = what they are doing, why, or why they are late or waiting. record = the reference record, sleeve, album or its bin. crowd = how many people came. whereis = where another named person is or whether they were seen. other = anything else.",
+    topicShots,
+    text,
+    askTopics,
+  );
+  // “Where is Ada?” needs someone other than the listener.
+  const about = others.find((id) => id !== who) ?? null;
+  return validate({ act: "ask", who, topic, about, correct });
 }
